@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SENTINEL — Product Intelligence</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #080b12;
+            color: #f5f7fa;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 235px;
+            background: #0d111a;
+            border-right: 1px solid #1d2430;
+            padding: 28px 20px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .brand-sub {
+            color: #707989;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            margin-bottom: 45px;
+        }
+
+        .nav-title {
+            color: #596170;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .nav-item {
+            padding: 13px 14px;
+            margin-bottom: 7px;
+            border-radius: 9px;
+            color: #aeb5c2;
+            font-size: 14px;
+        }
+
+        .nav-item.active {
+            background: #171d28;
+            color: white;
+            border-left: 3px solid #7c8cff;
+        }
+
+        .system-box {
+            position: absolute;
+            bottom: 25px;
+            left: 20px;
+            right: 20px;
+            padding: 15px;
+            background: #111722;
+            border: 1px solid #202938;
+            border-radius: 10px;
+        }
+
+        .system-title {
+            font-size: 10px;
+            color: #666f7f;
+            margin-bottom: 8px;
+        }
+
+        .system-status {
+            color: #71d99a;
+            font-size: 12px;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 235px;
+            width: calc(100% - 235px);
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .page-subtitle {
+            color: #707989;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+
+        .live {
+            padding: 9px 15px;
+            border: 1px solid #294235;
+            border-radius: 20px;
+            color: #72db9b;
+            font-size: 11px;
+        }
+
+        /* =========================
+           HEALTH
+        ========================= */
+
+        .health-card {
+            background: linear-gradient(
+                135deg,
+                #121823,
+                #0e131c
+            );
+
+            border: 1px solid #202938;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .health-label {
+            color: #737c8b;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .health-value {
+            font-size: 42px;
+            font-weight: bold;
+        }
+
+        .health-text {
+            color: #8e97a7;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        /* =========================
+           STATS
+        ========================= */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #10151f;
+            border: 1px solid #202938;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .stat-title {
+            color: #737c8b;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #6edc99;
+        }
+
+        .negative {
+            color: #ff7474;
+        }
+
+        /* =========================
+           PANELS
+        ========================= */
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: #10151f;
+            border: 1px solid #202938;
+            border-radius: 15px;
+            padding: 22px;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .panel-subtitle {
+            color: #687180;
+            font-size: 11px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            height: 280px;
+            position: relative;
+        }
+
+        /* =========================
+           INSIGHTS
+        ========================= */
+
+        .insights {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .insight {
+            background: #141a24;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #202938;
+        }
+
+        .insight-label {
+            color: #697383;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .insight-value {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        input,
+        select {
+            background: #0b1018;
+            border: 1px solid #252e3d;
+            color: white;
+            padding: 11px 13px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            color: #626c7c;
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 13px;
+            border-bottom: 1px solid #202938;
+        }
+
+        td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #181f2b;
+            font-size: 12px;
+            color: #c8ced8;
+        }
+
+        .badge {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+        }
+
+        .badge-positive {
+            background: #102b1e;
+            color: #6edc99;
+        }
+
+        .badge-negative {
+            background: #301619;
+            color: #ff7777;
+        }
+
+        .badge-neutral {
+            background: #242832;
+            color: #bfc5ce;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1000px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 18px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="layout">
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            SENTINEL
+        </div>
+
+        <div class="brand-sub">
+            PRODUCT INTELLIGENCE
+        </div>
+
+        <div class="nav-title">
+            ANALYTICS
+        </div>
+
+        <div class="nav-item active">
+            Overview
+        </div>
+
+        <div class="nav-item">
+            Sentiment
+        </div>
+
+        <div class="nav-item">
+            Reviews
+        </div>
+
+        <div class="nav-item">
+            Word Intelligence
+        </div>
+
+        <div class="system-box">
+
+            <div class="system-title">
+                SYSTEM STATUS
+            </div>
+
+            <div class="system-status">
+                ● DATA STREAM ACTIVE
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="main">
+
+        <!-- TOPBAR -->
+
+        <div class="topbar">
+
+            <div>
+
+                <div class="page-title">
+                    Product Intelligence
+                </div>
+
+                <div class="page-subtitle">
+                    Customer sentiment & review analytics
+                </div>
+
+            </div>
+
+            <div class="live">
+                ● SYSTEM LIVE
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             HEALTH SCORE
+        ========================= -->
+
+        <div class="health-card">
+
+            <div class="health-label">
+                PRODUCT HEALTH SCORE
+            </div>
+
+            <div
+                class="health-value"
+                id="healthScore">
+                --
+            </div>
+
+            <div
+                class="health-text"
+                id="healthText">
+                Analysing customer feedback...
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             STATS
+        ========================= -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    TOTAL REVIEWS
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalReviews">
+                    --
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    POSITIVE
+                </div>
+
+                <div
+                    class="stat-value positive"
+                    id="positiveReviews">
+                    --
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    NEGATIVE
+                </div>
+
+                <div
+                    class="stat-value negative"
+                    id="negativeReviews">
+                    --
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    AVERAGE RATING
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="averageRating">
+                    --
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             FIRST CHART ROW
+        ========================= -->
+
+        <div class="grid">
+
+            <!-- SENTIMENT DISTRIBUTION -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Sentiment Distribution
+                </div>
+
+                <div class="panel-subtitle">
+                    Overall customer sentiment
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="sentimentChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- RATING INTELLIGENCE -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Rating Intelligence
+                </div>
+
+                <div class="panel-subtitle">
+                    Customer rating distribution
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="ratingChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             SENTIMENT TREND
+        ========================= -->
+
+        <div
+            class="panel"
+            style="margin-bottom:20px;">
+
+            <div class="panel-title">
+                Sentiment Trend Over Time
+            </div>
+
+            <div class="panel-subtitle">
+                Daily movement of customer sentiment
+            </div>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="trendChart">
+                </canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             WORD FREQUENCY
+        ========================= -->
+
+        <div
+            class="panel"
+            style="margin-bottom:20px;">
+
+            <div class="panel-title">
+                Word Frequency Intelligence
+            </div>
+
+            <div class="panel-subtitle">
+                Most frequently mentioned words in customer reviews
+            </div>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="wordChart">
+                </canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             CUSTOMER INTELLIGENCE
+        ========================= -->
+
+        <div
+            class="panel"
+            style="margin-bottom:20px;">
+
+            <div class="panel-title">
+                Customer Intelligence
+            </div>
+
+            <div class="panel-subtitle">
+                Automatically generated review insights
+            </div>
+
+            <div class="insights">
+
+                <div class="insight">
+
+                    <div class="insight-label">
+                        Dominant Sentiment
+                    </div>
+
+                    <div
+                        class="insight-value"
+                        id="dominantSentiment">
+                        --
+                    </div>
+
+                </div>
+
+
+                <div class="insight">
+
+                    <div class="insight-label">
+                        Strongest Rating
+                    </div>
+
+                    <div
+                        class="insight-value"
+                        id="strongestRating">
+                        --
+                    </div>
+
+                </div>
+
+
+                <div class="insight">
+
+                    <div class="insight-label">
+                        Review Signal
+                    </div>
+
+                    <div
+                        class="insight-value"
+                        id="reviewSignal">
+                        --
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             REVIEW EXPLORER
+        ========================= -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Review Explorer
+            </div>
+
+            <div class="panel-subtitle">
+                Search and filter customer feedback
+            </div>
+
+
+            <div class="controls">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search reviews..."
+                >
+
+                <select id="sentimentFilter">
+
+                    <option value="All">
+                        All Sentiments
+                    </option>
+
+                    <option value="Positive">
+                        Positive
+                    </option>
+
+                    <option value="Negative">
+                        Negative
+                    </option>
+
+                    <option value="Neutral">
+                        Neutral
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Product
+                            </th>
+
+                            <th>
+                                Review
+                            </th>
+
+                            <th>
+                                Rating
+                            </th>
+
+                            <th>
+                                Sentiment
+                            </th>
+
+                            <th>
+                                Polarity
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="reviewTable">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       CHART VARIABLES
+    ========================= */
+
+    let allReviews = [];
+
+    let sentimentChart;
+    let ratingChart;
+    let wordChart;
+    let trendChart;
+
+
+    /* =========================
+       LOAD DASHBOARD
+    ========================= */
+
+    async function loadDashboard() {
+
+        try {
+
+            const response =
+                await fetch("/api/reviews");
+
+            allReviews =
+                await response.json();
+
+            updateStats(allReviews);
+
+            updateCharts(allReviews);
+
+            updateReviews();
+
+            updateInsights(allReviews);
+
+            await loadWordFrequency();
+
+            await loadSentimentTrend();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Dashboard loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================
+       UPDATE STATS
+    ========================= */
+
+    function updateStats(reviews) {
+
+        const total =
+            reviews.length;
+
+
+        const positive =
+            reviews.filter(
+                r => r.sentiment === "Positive"
+            ).length;
+
+
+        const negative =
+            reviews.filter(
+                r => r.sentiment === "Negative"
+            ).length;
+
+
+        const neutral =
+            reviews.filter(
+                r => r.sentiment === "Neutral"
+            ).length;
+
+
+        const averageRating =
+            total > 0
+            ? reviews.reduce(
+                (sum, r) =>
+                    sum + Number(r.rating),
+                0
+            ) / total
+            : 0;
+
+
+        document.getElementById(
+            "totalReviews"
+        ).textContent =
+            total;
+
+
+        document.getElementById(
+            "positiveReviews"
+        ).textContent =
+            positive;
+
+
+        document.getElementById(
+            "negativeReviews"
+        ).textContent =
+            negative;
+
+
+        document.getElementById(
+            "averageRating"
+        ).textContent =
+            averageRating.toFixed(1)
+            + " / 5";
+
+
+        /* HEALTH SCORE */
+
+        const healthScore =
+            total > 0
+            ? Math.round(
+                (
+                    positive +
+                    neutral * 0.5
+                ) / total * 100
+            )
+            : 0;
+
+
+        document.getElementById(
+            "healthScore"
+        ).textContent =
+            healthScore + "%";
+
+
+        document.getElementById(
+            "healthText"
+        ).textContent =
+
+            healthScore >= 70
+
+            ? "Customer feedback shows a positive product signal."
+
+            : "Customer feedback indicates areas that may need attention.";
+
+    }
+
+
+    /* =========================
+       SENTIMENT + RATING CHARTS
+    ========================= */
+
+    function updateCharts(reviews) {
+
+        const positive =
+            reviews.filter(
+                r => r.sentiment === "Positive"
+            ).length;
+
+
+        const negative =
+            reviews.filter(
+                r => r.sentiment === "Negative"
+            ).length;
+
+
+        const neutral =
+            reviews.filter(
+                r => r.sentiment === "Neutral"
+            ).length;
+
+
+        const ratingCounts =
+            [1, 2, 3, 4, 5].map(
+                rating =>
+
+                    reviews.filter(
+                        r =>
+                            Number(r.rating)
+                            === rating
+                    ).length
+            );
+
+
+        if (sentimentChart) {
+
+            sentimentChart.destroy();
+
+        }
+
+
+        if (ratingChart) {
+
+            ratingChart.destroy();
+
+        }
+
+
+        /* SENTIMENT DOUGHNUT */
+
+        sentimentChart =
+            new Chart(
+
+                document.getElementById(
+                    "sentimentChart"
+                ),
+
+                {
+
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: [
+                            "Positive",
+                            "Negative",
+                            "Neutral"
+                        ],
+
+                        datasets: [{
+
+                            data: [
+                                positive,
+                                negative,
+                                neutral
+                            ]
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom",
+
+                                labels: {
+
+                                    color:
+                                        "#c8ced8"
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+
+        /* RATING BAR */
+
+        ratingChart =
+            new Chart(
+
+                document.getElementById(
+                    "ratingChart"
+                ),
+
+                {
+
+                    type: "bar",
+
+                    data: {
+
+                        labels: [
+                            "1★",
+                            "2★",
+                            "3★",
+                            "4★",
+                            "5★"
+                        ],
+
+                        datasets: [{
+
+                            label: "Reviews",
+
+                            data:
+                                ratingCounts
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        scales: {
+
+                            x: {
+
+                                ticks: {
+
+                                    color:
+                                        "#8992a1"
+
+                                },
+
+                                grid: {
+
+                                    display: false
+
+                                }
+
+                            },
+
+                            y: {
+
+                                beginAtZero: true,
+
+                                ticks: {
+
+                                    color:
+                                        "#8992a1",
+
+                                    precision: 0
+
+                                },
+
+                                grid: {
+
+                                    color:
+                                        "#202938"
+
+                                }
+
+                            }
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+
+                                display: false
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+    /* =========================
+       WORD FREQUENCY
+    ========================= */
+
+    async function loadWordFrequency() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/word-frequency"
+                );
+
+
+            const words =
+                await response.json();
+
+
+            const labels =
+                words.map(
+                    item => item.word
+                );
+
+
+            const counts =
+                words.map(
+                    item => item.count
+                );
+
+
+            if (wordChart) {
+
+                wordChart.destroy();
+
+            }
+
+
+            wordChart =
+                new Chart(
+
+                    document.getElementById(
+                        "wordChart"
+                    ),
+
+                    {
+
+                        type: "bar",
+
+                        data: {
+
+                            labels: labels,
+
+                            datasets: [{
+
+                                label: "Mentions",
+
+                                data: counts
+
+                            }]
+
+                        },
+
+                        options: {
+
+                            indexAxis: "y",
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            scales: {
+
+                                x: {
+
+                                    beginAtZero: true,
+
+                                    ticks: {
+
+                                        color:
+                                            "#8992a1",
+
+                                        precision: 0
+
+                                    },
+
+                                    grid: {
+
+                                        color:
+                                            "#202938"
+
+                                    }
+
+                                },
+
+                                y: {
+
+                                    ticks: {
+
+                                        color:
+                                            "#c8ced8"
+
+                                    },
+
+                                    grid: {
+
+                                        display: false
+
+                                    }
+
+                                }
+
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    display: false
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Word frequency error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================
+       SENTIMENT TREND
+    ========================= */
+
+    async function loadSentimentTrend() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/sentiment-trend"
+                );
+
+
+            const data =
+                await response.json();
+
+
+            const dates =
+                data.map(
+                    item => item.date
+                );
+
+
+            const positive =
+                data.map(
+                    item => item.Positive
+                );
+
+
+            const negative =
+                data.map(
+                    item => item.Negative
+                );
+
+
+            const neutral =
+                data.map(
+                    item => item.Neutral
+                );
+
+
+            if (trendChart) {
+
+                trendChart.destroy();
+
+            }
+
+
+            trendChart =
+                new Chart(
+
+                    document.getElementById(
+                        "trendChart"
+                    ),
+
+                    {
+
+                        type: "line",
+
+                        data: {
+
+                            labels: dates,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Positive",
+
+                                    data:
+                                        positive,
+
+                                    tension:
+                                        0.3
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Negative",
+
+                                    data:
+                                        negative,
+
+                                    tension:
+                                        0.3
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Neutral",
+
+                                    data:
+                                        neutral,
+
+                                    tension:
+                                        0.3
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            interaction: {
+
+                                mode:
+                                    "index",
+
+                                intersect:
+                                    false
+
+                            },
+
+                            scales: {
+
+                                x: {
+
+                                    ticks: {
+
+                                        color:
+                                            "#8992a1"
+
+                                    },
+
+                                    grid: {
+
+                                        display: false
+
+                                    }
+
+                                },
+
+                                y: {
+
+                                    beginAtZero: true,
+
+                                    ticks: {
+
+                                        color:
+                                            "#8992a1",
+
+                                        precision: 0
+
+                                    },
+
+                                    grid: {
+
+                                        color:
+                                            "#202938"
+
+                                    }
+
+                                }
+
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    position:
+                                        "bottom",
+
+                                    labels: {
+
+                                        color:
+                                            "#c8ced8"
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Sentiment trend error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================
+       CUSTOMER INSIGHTS
+    ========================= */
+
+    function updateInsights(reviews) {
+
+        const positive =
+            reviews.filter(
+                r => r.sentiment === "Positive"
+            ).length;
+
+
+        const negative =
+            reviews.filter(
+                r => r.sentiment === "Negative"
+            ).length;
+
+
+        const neutral =
+            reviews.filter(
+                r => r.sentiment === "Neutral"
+            ).length;
+
+
+        let dominant =
+            "Positive";
+
+
+        if (
+            negative > positive &&
+            negative > neutral
+        ) {
+
+            dominant =
+                "Negative";
+
+        }
+
+
+        else if (
+            neutral > positive &&
+            neutral > negative
+        ) {
+
+            dominant =
+                "Neutral";
+
+        }
+
+
+        document.getElementById(
+            "dominantSentiment"
+        ).textContent =
+
+            dominant +
+            " sentiment dominates the current review dataset.";
+
+
+        const ratings =
+            reviews.map(
+                r => Number(r.rating)
+            );
+
+
+        const fiveStar =
+            ratings.filter(
+                r => r === 5
+            ).length;
+
+
+        document.getElementById(
+            "strongestRating"
+        ).textContent =
+
+            fiveStar +
+            " reviews received the highest 5-star rating.";
+
+
+        document.getElementById(
+            "reviewSignal"
+        ).textContent =
+
+            negative > positive
+
+            ? "Negative feedback requires attention."
+
+            : "Customer feedback is largely positive.";
+
+    }
+
+
+    /* =========================
+       REVIEW TABLE
+    ========================= */
+
+    function updateReviews() {
+
+        const search =
+            document.getElementById(
+                "searchInput"
+            ).value.toLowerCase();
+
+
+        const filter =
+            document.getElementById(
+                "sentimentFilter"
+            ).value;
+
+
+        const filtered =
+            allReviews.filter(
+                review => {
+
+                    const matchesSearch =
+
+                        review.review
+                            .toLowerCase()
+                            .includes(search);
+
+
+                    const matchesFilter =
+
+                        filter === "All" ||
+                        review.sentiment === filter;
+
+
+                    return (
+                        matchesSearch &&
+                        matchesFilter
+                    );
+
+                }
+            );
+
+
+        const table =
+            document.getElementById(
+                "reviewTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        filtered.forEach(
+            review => {
+
+                let badgeClass =
+                    "badge-neutral";
+
+
+                if (
+                    review.sentiment
+                    === "Positive"
+                ) {
+
+                    badgeClass =
+                        "badge-positive";
+
+                }
+
+
+                if (
+                    review.sentiment
+                    === "Negative"
+                ) {
+
+                    badgeClass =
+                        "badge-negative";
+
+                }
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${review.product}
+                    </td>
+
+                    <td>
+                        ${review.review}
+                    </td>
+
+                    <td>
+                        ${review.rating} ★
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="badge ${badgeClass}">
+                            ${review.sentiment}
+                        </span>
+
+                    </td>
+
+                    <td>
+                        ${Number(
+                            review.polarity
+                        ).toFixed(2)}
+                    </td>
+
+                `;
+
+
+                table.appendChild(row);
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    document.getElementById(
+        "searchInput"
+    ).addEventListener(
+        "input",
+        updateReviews
+    );
+
+
+    /* =========================
+       SENTIMENT FILTER
+    ========================= */
+
+    document.getElementById(
+        "sentimentFilter"
+    ).addEventListener(
+        "change",
+        updateReviews
+    );
+
+
+    /* =========================
+       INITIAL LOAD
+    ========================= */
+
+    loadDashboard();
+
+
+    /* =========================
+       AUTO REFRESH
+    ========================= */
+
+    setInterval(
+        loadDashboard,
+        30000
+    );
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+date,product,review,rating,sentiment,polarity
+2026-09-01,Wireless Headphones,The sound quality is amazing and the battery lasts very long,5,Positive,0.3116666666666667
+2026-09-02,Wireless Headphones,"I really love these headphones, they are comfortable",5,Positive,0.45
+2026-09-03,Wireless Headphones,Good product for the price,4,Positive,0.7
+2026-09-04,Wireless Headphones,"The quality is okay, nothing special",3,Positive,0.4285714285714286
+2026-09-05,Wireless Headphones,Very poor sound quality and stopped working quickly,1,Positive,0.07111111111111111
+2026-09-06,Wireless Headphones,I am disappointed with this product,2,Negative,-0.75
+2026-09-07,Wireless Headphones,"Excellent product, highly recommended",5,Positive,0.58
+2026-09-08,Wireless Headphones,The product is average,3,Negative,-0.15
+2026-09-09,Wireless Headphones,"Waste of money, completely disappointed",1,Negative,-0.475
+2026-09-10,Wireless Headphones,Fast delivery and great product,5,Positive,0.5
+2026-09-11,Wireless Headphones,Battery life is excellent and sound is clear,5,Positive,0.5
+2026-09-12,Wireless Headphones,Not worth the money,2,Negative,-0.15
+2026-09-13,Wireless Headphones,It works fine for daily use,4,Positive,0.20833333333333334
+2026-09-14,Wireless Headphones,The headphones stopped working after a few days,1,Negative,-0.2
+2026-09-15,Wireless Headphones,Very comfortable and easy to use,5,Positive,0.4766666666666667
