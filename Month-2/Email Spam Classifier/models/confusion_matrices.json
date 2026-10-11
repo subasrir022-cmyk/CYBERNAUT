@@ -1,0 +1,32 @@
+{
+    "Multinomial Naive Bayes": [
+        [
+            966,
+            0
+        ],
+        [
+            52,
+            97
+        ]
+    ],
+    "Logistic Regression": [
+        [
+            966,
+            0
+        ],
+        [
+            34,
+            115
+        ]
+    ],
+    "Calibrated Linear SVM": [
+        [
+            961,
+            5
+        ],
+        [
+            7,
+            142
+        ]
+    ]
+}

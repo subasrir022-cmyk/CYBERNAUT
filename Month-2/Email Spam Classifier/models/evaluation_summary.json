@@ -1,0 +1,13 @@
+{
+    "selected_model": "Calibrated Linear SVM",
+    "test_samples": 1115,
+    "accuracy": 0.989237668161435,
+    "precision": 0.9659863945578231,
+    "recall": 0.9530201342281879,
+    "f1_score": 0.9594594594594594,
+    "false_positive_rate": 0.005175983436853002,
+    "true_negative": 961,
+    "false_positive": 5,
+    "false_negative": 7,
+    "true_positive": 142
+}
