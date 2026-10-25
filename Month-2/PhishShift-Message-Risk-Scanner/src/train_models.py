@@ -2,10 +2,11 @@
 from pathlib import Path
 import json
 import re
+
 import joblib
 import numpy as np
-
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -24,16 +25,43 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 
+from src.near_duplicates import remove_near_duplicate_rows
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "processed" / "sms_unique_messages.csv"
 RESULTS = ROOT / "results"
 MODELS = ROOT / "models"
 
-RESULTS.mkdir(exist_ok=True)
-MODELS.mkdir(exist_ok=True)
+RESULTS.mkdir(parents=True, exist_ok=True)
+MODELS.mkdir(parents=True, exist_ok=True)
 
 
+def remove_near_duplicates(messages, threshold=0.92):
+    """Remove near-duplicate messages while preserving the first occurrence."""
+    from difflib import SequenceMatcher
+
+    cleaned = []
+    normalized_messages = []
+
+    for message in messages:
+        original = str(message).strip()
+        normalized = re.sub(r"\s+", " ", original.lower())
+        normalized = re.sub(r"[^\w\s]", "", normalized)
+
+        if not normalized:
+            continue
+
+        if any(
+            SequenceMatcher(None, normalized, old).ratio() >= threshold
+            for old in normalized_messages
+        ):
+            continue
+
+        cleaned.append(original)
+        normalized_messages.append(normalized)
+
+    return cleaned
 def rule_baseline(message):
     """Explainable spam-risk rules; not a phishing verdict."""
     text = str(message).lower()
@@ -69,9 +97,8 @@ def rule_baseline(message):
             score += points
             cues.append(cue)
 
-    return (
-        int(score >= 2),
-        "; ".join(cues) if cues else "no configured rule matched",
+    return int(score >= 2), (
+        "; ".join(cues) if cues else "no configured rule matched"
     )
 
 
@@ -85,17 +112,92 @@ def main():
     if not required.issubset(df.columns):
         raise ValueError(f"Dataset must contain columns: {required}")
 
+    # Basic cleaning and label validation.
     df = df.dropna(subset=["message_text", "label"]).copy()
     df["label"] = df["label"].astype(str).str.lower().str.strip()
     df["message_text"] = df["message_text"].astype(str).str.strip()
+
     df = df[df["label"].isin(["ham", "spam"])]
     df = df[df["message_text"] != ""]
-    df = df.drop_duplicates(subset=["message_text"]).reset_index(drop=True)
+
+    # Remove exact duplicates while preserving each message's label.
+    df = df.drop_duplicates(
+        subset=["message_text"], keep="first"
+    ).reset_index(drop=True)
+
+    messages_after_exact_dedup = len(df)
 
     if len(df) < 20 or df["label"].nunique() != 2:
-        raise ValueError("Not enough labelled ham/spam messages to train.")
+        raise ValueError(
+            "Not enough labelled ham/spam messages to train."
+        )
 
-    # This dataset contains spam/ham labels, not verified phishing labels.
+    # Keep the original labelled rows so conflict indexes can be reviewed.
+    original_df = df.copy()
+
+    # Remove near-duplicates only when their labels match.
+    # Messages with conflicting labels are retained and flagged for review.
+    df, conflicting_pairs = remove_near_duplicate_rows(
+        df, threshold=0.92
+    )
+
+    df = df.reset_index(drop=True)
+    messages_after_near_dedup = len(df)
+
+    near_duplicates_removed = (
+        messages_after_exact_dedup - messages_after_near_dedup
+    )
+
+    print(
+        f"Messages before near-duplicate removal: "
+        f"{messages_after_exact_dedup}"
+    )
+    print(
+        f"Messages after near-duplicate removal: "
+        f"{messages_after_near_dedup}"
+    )
+    print(
+        f"Conflicting-label pairs flagged for review: "
+        f"{len(conflicting_pairs)}"
+    )
+
+    # Save potentially conflicting near-duplicate pairs for manual review.
+    conflict_rows = []
+
+    for first_idx, second_idx in conflicting_pairs:
+        first = original_df.iloc[first_idx]
+        second = original_df.iloc[second_idx]
+
+        conflict_rows.append({
+            "message_1": first["message_text"],
+            "label_1": first["label"],
+            "message_2": second["message_text"],
+            "label_2": second["label"],
+            "similarity_threshold": 0.92,
+            "review_status": "needs manual review",
+        })
+
+    conflict_file = RESULTS / "near_duplicate_label_conflicts.csv"
+
+    pd.DataFrame(
+        conflict_rows,
+        columns=[
+            "message_1",
+            "label_1",
+            "message_2",
+            "label_2",
+            "similarity_threshold",
+            "review_status",
+        ],
+    ).to_csv(conflict_file, index=False)
+
+    if len(df) < 20 or df["label"].nunique() != 2:
+        raise ValueError(
+            "Not enough labelled ham/spam messages after "
+            "near-duplicate removal."
+        )
+
+    # The dataset has ham/spam labels, not verified phishing labels.
     X = df["message_text"]
     y = df["label"].map({"ham": 0, "spam": 1})
 
@@ -155,6 +257,7 @@ def main():
             safe_name = re.sub(
                 r"[^a-z0-9]+", "_", name.lower()
             ).strip("_")
+
             joblib.dump(model, MODELS / f"{safe_name}.joblib")
 
         cm = confusion_matrix(y_test, predictions, labels=[0, 1])
@@ -170,7 +273,9 @@ def main():
             "recall": recall_score(
                 y_test, predictions, zero_division=0
             ),
-            "f1": f1_score(y_test, predictions, zero_division=0),
+            "f1": f1_score(
+                y_test, predictions, zero_division=0
+            ),
             "false_positive_rate": fpr,
             "TN": int(tn),
             "FP": int(fp),
@@ -180,11 +285,14 @@ def main():
 
         confusion[name] = cm.tolist()
 
+    # Save model metrics and confusion matrices.
     metrics = pd.DataFrame(rows)
     metrics.to_csv(RESULTS / "model_metrics.csv", index=False)
 
     with open(
-        RESULTS / "confusion_matrices.json", "w", encoding="utf-8"
+        RESULTS / "confusion_matrices.json",
+        "w",
+        encoding="utf-8",
     ) as f:
         json.dump(confusion, f, indent=2)
 
@@ -212,7 +320,6 @@ def main():
         display_labels=["ham", "spam"],
     )
     disp.plot()
-
     plt.title(f"Confusion Matrix - {best_name}")
     plt.tight_layout()
     plt.savefig(RESULTS / "confusion_matrix.png", dpi=150)
@@ -233,8 +340,7 @@ def main():
     keyword_df = pd.DataFrame({
         "keyword": terms,
         "mean_tfidf": scores,
-    })
-    keyword_df = keyword_df.sort_values(
+    }).sort_values(
         "mean_tfidf", ascending=False
     ).head(20)
 
@@ -249,38 +355,69 @@ def main():
         legend=False,
         figsize=(9, 7),
     )
-
     plt.title("Frequent Terms in Spam-Labeled Training Messages")
     plt.xlabel("Mean TF-IDF")
     plt.tight_layout()
     plt.savefig(RESULTS / "spam_keywords.png", dpi=150)
     plt.close()
 
+    # Save a summary of the evaluation and dataset limitations.
     summary = {
         "dataset": "UCI SMS Spam Collection",
-        "task": "ham vs spam SMS classification; not verified phishing detection",
+        "task": (
+            "ham vs spam SMS classification; "
+            "not verified phishing detection"
+        ),
         "total_unique_messages": int(len(df)),
+        "messages_after_exact_dedup": int(messages_after_exact_dedup),
+        "messages_after_near_dedup": int(messages_after_near_dedup),
+        "near_duplicates_removed": int(near_duplicates_removed),
+        "near_duplicate_similarity_threshold": 0.92,
+        "conflicting_label_pairs_flagged": len(conflicting_pairs),
+        "conflicting_label_report": str(
+            conflict_file.relative_to(ROOT)
+        ),
         "training_messages": int(len(X_train)),
         "test_messages": int(len(X_test)),
         "label_mapping": {"ham": 0, "spam": 1},
-        "split": "stratified random split; campaign-separated testing not implemented",
+        "split": (
+            "stratified random split; "
+            "campaign-separated testing not implemented"
+        ),
         "best_by_f1": str(best_name),
         "limitations": [
             "UCI spam labels do not mean all spam messages are phishing.",
             "Random split is not campaign-separated evaluation.",
+            (
+                "Near-duplicate matching uses character n-gram "
+                "similarity; review conflicting labels manually."
+            ),
             "Rules are a simple baseline and may produce false positives.",
-            "NCSU records with unknown labels were not used for supervised training.",
+            "Records with unknown labels are not used for supervised training.",
         ],
     }
 
     with open(
-        RESULTS / "evaluation_summary.json", "w", encoding="utf-8"
+        RESULTS / "evaluation_summary.json",
+        "w",
+        encoding="utf-8",
     ) as f:
         json.dump(summary, f, indent=2)
 
     print("\nTraining and evaluation completed.")
     print(metrics.round(4).to_string(index=False))
     print(f"\nBest by F1: {best_name}")
+    print(
+        f"Messages after exact deduplication: "
+        f"{messages_after_exact_dedup}"
+    )
+    print(
+        f"Messages after near-deduplication: "
+        f"{messages_after_near_dedup}"
+    )
+    print(f"Near-duplicates removed: {near_duplicates_removed}")
+    print(f"Conflicting-label pairs flagged: {len(conflicting_pairs)}")
+    print(f"Conflict review report: {conflict_file}")
     print(f"Results saved in: {RESULTS}")
     print(f"Models saved in: {MODELS}")
 

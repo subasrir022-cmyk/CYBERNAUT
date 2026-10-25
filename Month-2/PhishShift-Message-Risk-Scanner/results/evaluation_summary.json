@@ -1,9 +1,15 @@
 {
   "dataset": "UCI SMS Spam Collection",
   "task": "ham vs spam SMS classification; not verified phishing detection",
-  "total_unique_messages": 5158,
-  "training_messages": 4126,
-  "test_messages": 1032,
+  "total_unique_messages": 5080,
+  "messages_after_exact_dedup": 5158,
+  "messages_after_near_dedup": 5080,
+  "near_duplicates_removed": 78,
+  "near_duplicate_similarity_threshold": 0.92,
+  "conflicting_label_pairs_flagged": 0,
+  "conflicting_label_report": "results\\near_duplicate_label_conflicts.csv",
+  "training_messages": 4064,
+  "test_messages": 1016,
   "label_mapping": {
     "ham": 0,
     "spam": 1
@@ -13,7 +19,8 @@
   "limitations": [
     "UCI spam labels do not mean all spam messages are phishing.",
     "Random split is not campaign-separated evaluation.",
+    "Near-duplicate matching uses character n-gram similarity; review conflicting labels manually.",
     "Rules are a simple baseline and may produce false positives.",
-    "NCSU records with unknown labels were not used for supervised training."
+    "Records with unknown labels are not used for supervised training."
   ]
 }
