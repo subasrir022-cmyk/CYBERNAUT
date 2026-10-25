@@ -1,0 +1,7 @@
+metric,value
+total_messages_checked,68029
+candidate_match_records,10
+unique_matched_message_ids,10
+unique_normalized_messages,5
+unique_candidate_campaign_ids,5
+unmatched_records,68019

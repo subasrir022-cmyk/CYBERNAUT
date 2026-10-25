@@ -1,0 +1,32 @@
+{
+  "Rules baseline": [
+    [
+      902,
+      2
+    ],
+    [
+      106,
+      22
+    ]
+  ],
+  "Multinomial Naive Bayes": [
+    [
+      904,
+      0
+    ],
+    [
+      38,
+      90
+    ]
+  ],
+  "Logistic Regression": [
+    [
+      892,
+      12
+    ],
+    [
+      10,
+      118
+    ]
+  ]
+}

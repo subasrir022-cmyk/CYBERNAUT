@@ -1,0 +1,19 @@
+{
+  "dataset": "UCI SMS Spam Collection",
+  "task": "ham vs spam SMS classification; not verified phishing detection",
+  "total_unique_messages": 5158,
+  "training_messages": 4126,
+  "test_messages": 1032,
+  "label_mapping": {
+    "ham": 0,
+    "spam": 1
+  },
+  "split": "stratified random split; campaign-separated testing not implemented",
+  "best_by_f1": "Logistic Regression",
+  "limitations": [
+    "UCI spam labels do not mean all spam messages are phishing.",
+    "Random split is not campaign-separated evaluation.",
+    "Rules are a simple baseline and may produce false positives.",
+    "NCSU records with unknown labels were not used for supervised training."
+  ]
+}

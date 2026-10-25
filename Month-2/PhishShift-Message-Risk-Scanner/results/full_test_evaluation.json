@@ -1,0 +1,42 @@
+{
+  "dataset": "UCI SMS Spam Collection",
+  "test_messages": 1032,
+  "correct_predictions": 1010,
+  "incorrect_predictions": 22,
+  "accuracy": 0.9786821705426356,
+  "precision_spam": 0.9076923076923077,
+  "recall_spam": 0.921875,
+  "f1_spam": 0.9147286821705426,
+  "true_negatives": 892,
+  "false_positives": 12,
+  "false_negatives": 10,
+  "true_positives": 118,
+  "classification_report": {
+    "ham": {
+      "precision": 0.9889135254988913,
+      "recall": 0.9867256637168141,
+      "f1-score": 0.9878183831672204,
+      "support": 904.0
+    },
+    "spam": {
+      "precision": 0.9076923076923077,
+      "recall": 0.921875,
+      "f1-score": 0.9147286821705426,
+      "support": 128.0
+    },
+    "accuracy": 0.9786821705426356,
+    "macro avg": {
+      "precision": 0.9483029165955995,
+      "recall": 0.9543003318584071,
+      "f1-score": 0.9512735326688815,
+      "support": 1032.0
+    },
+    "weighted avg": {
+      "precision": 0.9788395760035012,
+      "recall": 0.9786821705426356,
+      "f1-score": 0.9787529938963146,
+      "support": 1032.0
+    }
+  },
+  "note": "This evaluates ham/spam SMS classification, not verified phishing detection. It uses the existing random test split."
+}

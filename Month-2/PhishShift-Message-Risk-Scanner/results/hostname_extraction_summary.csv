@@ -1,0 +1,6 @@
+metric,value
+original_campaign_rows,35128
+extracted_campaign_hostname_pairs,35481
+campaigns_with_hostnames,35127
+campaigns_without_hostnames,1
+unique_hostnames,1500

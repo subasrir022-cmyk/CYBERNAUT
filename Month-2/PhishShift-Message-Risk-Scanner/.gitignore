@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+
+# Local backup files
+*.backup
+*.bak
+
+# Duplicate local manifest copies
+data_manifest.csv.csv
+data_manifest_updated (1).csv

@@ -1,0 +1,6 @@
+{
+  "total_errors": 22,
+  "false_positives": 12,
+  "false_negatives": 10,
+  "note": "Errors are from ham/spam SMS classification, not verified phishing detection."
+}
